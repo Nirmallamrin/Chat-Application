@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { useAuthContext } from "../context/AuthContext";
 
 const Login = () => {
+
+  const { setAuthUser } = useAuthContext()
+  
   const [inputs, setInputs] = useState({
     username: "",
     password: ""
@@ -13,19 +17,22 @@ const Login = () => {
     e.preventDefault()
 
       if (!inputs.username || !inputs.password) {
-    toast.error("Please fill the all detils")
+    toast.error("Please fill the all details")
     return
   }
 
   try {
     const req = await axios.post("http://localhost:5000/users/login", inputs);
-    toast.success("Login Successfully")
-    console.log(req.data)
+      const userData = req.data; // Extract user data from the response
+      toast.success("Login Successful");
+
+      localStorage.setItem("chat-user", JSON.stringify(userData));
+      setAuthUser(userData);
   } catch (error) {
     if (error.response && error.response.status ===400) {
       toast.error("invaid username and password");
     } else {
-
+      toast.error("Something went wrong, please try again");
     }
   }
   }
@@ -57,7 +64,7 @@ const Login = () => {
           </div>
           <div className="w-full flex items-center justify-center">
             <input
-              type="text"
+              type="password"
               placeholder="Enter your Password"
               className="bg-gray-700 text-white input input-bordered w-full max-w-xs"
               value={inputs.password}
